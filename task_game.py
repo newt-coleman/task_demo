@@ -97,10 +97,10 @@ class TaskTrial:
                 self.score_label['text'] = "SCORE: " + str(self.score)
             else:
                  self.rewards.append(0)
-        else:
+        else:  # only false ne
             self.rewards.append(0)
             self.last_correct = 0
-        # else:
+        # else:  ## false positive
         #     if np.random.random(1)[0] >= self.p_index:
         #         self.rewards.append(1)
         #         self.score += 50
@@ -208,7 +208,7 @@ def run_trials(ntrials, p_levels, userid = 'test'):
    
     root.mainloop()
 
-run_trials(N_TRIALS, P_LEVELS)
+run_trials(N_TRIALS, P_LEVELS, )
 
 
 
