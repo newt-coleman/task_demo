@@ -97,7 +97,7 @@ class TaskTrial:
                 self.score_label['text'] = "SCORE: " + str(self.score)
             else:
                  self.rewards.append(0)
-        else:  # only false ne
+        else:  # only false negatives
             self.rewards.append(0)
             self.last_correct = 0
         # else:  ## false positive
@@ -121,14 +121,16 @@ class TaskTrial:
         else: # export data and end this trial
             outpath = os.getcwd() + r"\\" + self.userid + r"\\"
             name = "choicedata_" + str(self.p_index) + "_" + str(self.feature[0]) + str(self.feature[1]) + "_"
+            r_name = "reward_" + str(self.p_index) + "_" + str(self.feature[0]) + str(self.feature[1]) + "_"
             if os.path.exists(outpath) is False:
                  os.mkdir(outpath)
             unique = 0 
-            while(os.path.isfile(outpath + name + str(unique) + '.csv')):
+            while(os.path.isfile(outpath + name + str(unique) + '.npy')):
                  unique += 1
                 
-            self.choice_data.to_csv(outpath + name + str(unique) + '.csv')
-            np.save(outpath + name + str(unique), self.rewards)
+            out_data = self.choice_data.to_numpy()
+            np.save(outpath + name + str(unique), out_data)
+            np.save(outpath + r_name + str(unique), self.rewards)
             self.frame_choose.destroy()
 
     def create_frames(self):
