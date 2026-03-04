@@ -6,8 +6,7 @@ import os
 import errno
 
 
-## To Do: save/export choices and options
- #        add rxn times??
+## To Do: add rxn times??
 
 class TaskTrial:
     """
@@ -97,17 +96,17 @@ class TaskTrial:
                 self.score_label['text'] = "SCORE: " + str(self.score)
             else:
                  self.rewards.append(0)
-        else:  # only false negatives
-            self.rewards.append(0)
-            self.last_correct = 0
-        # else:  ## false positive
-        #     if np.random.random(1)[0] >= self.p_index:
-        #         self.rewards.append(1)
-        #         self.score += 50
-        #         self.score_label['text'] = "SCORE: " + str(self.score)
-        #     else:
-        #         self.rewards.append(0)
+        # else:  # only false negatives
+        #     self.rewards.append(0)
         #     self.last_correct = 0
+        else:  ## false positive
+            if np.random.random(1)[0] >= self.p_index:
+                self.rewards.append(1)
+                self.score += 50
+                self.score_label['text'] = "SCORE: " + str(self.score)
+            else:
+                self.rewards.append(0)
+            self.last_correct = 0
             
 
         self.choice_data.loc[len(self.choice_data)] = [stimuli_options[:, 0], 
@@ -210,7 +209,7 @@ def run_trials(ntrials, p_levels, userid = 'test'):
    
     root.mainloop()
 
-run_trials(N_TRIALS, P_LEVELS, )
+run_trials(N_TRIALS, P_LEVELS, "")
 
 
 
