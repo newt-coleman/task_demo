@@ -44,14 +44,16 @@ class FeatureRLDecay():
         p_a = self.boltz_prob()
 
         a_k_idx = np.random.choice(list(range(4)), p=p_a)
-        return a_k_idx
+        return a_k_idx, p_a
 
     def update_v(self, a_k_idx, r):
-        a_k = np.array(self.actions[a_k_idx])[0][0]  # FIX THIS SHAPE ISSUE BW TRAIN AND PREDICT
+        a_k = self.actions[a_k_idx] # FIX THIS SHAPE ISSUE BW TRAIN AND PREDICT
+        if a_k.shape == (1,1):
+            a_k = a_k[0][0]
         self.set_q()
         for z in self.v_feature.keys():
             if np.all(z==a_k[0]) or np.all(z==a_k[1]) or np.all(z==a_k[2]):
                 # print("qi=" + str(self.q[a_k_idx]))
-                self.v_feature[z] += self.alpha*(r-self.q[a_k_idx])
+                self.v_feature[z] += self.alpha*((50*r)-self.q[a_k_idx])
             else:
                 self.v_feature[z] *= self.gamma

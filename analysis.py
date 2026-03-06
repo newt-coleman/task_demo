@@ -3,6 +3,7 @@ import os
 import errno
 from scipy.optimize import minimize
 import RL
+from scipy.stats import f_oneway, describe
 
 class Subject():
     
@@ -26,6 +27,7 @@ class Subject():
             else:
                 rd[idx].append(dat)
 
+        
         # split data into train and test sets
         test_args = np.random.choice(list(range(0, len(rd[0]))), 
                                      size = int(0.3*len(rd[0])), replace =False)
@@ -39,6 +41,16 @@ class Subject():
                     self.train_envs[j].append(envs[j][i])
                     self.train_rd[j].append(rd[j][i])
         print(len(self.train_envs[0]))
+
+        ## all train all test
+        # for i in range(len(rd[0])):
+        #     for j in range(len(self.p_levels)):
+        #         self.test_envs[j].append(envs[j][i])
+        #         self.test_rd[j].append(rd[j][i])
+        # self.train_envs = self.test_envs
+        # self.train_rd = self.test_rd
+ 
+        # print(len(self.train_envs[0]))
 
 
     def __init__(self, data_path, p_levels):
@@ -104,20 +116,20 @@ class Subject():
             return -1 * self.LL(env, reward_data, alpha, beta, gamma)
         
         print("Start!")
-        res = minimize(loss, x0 = [0.5, 0.5, 0.1], 
+        res = minimize(loss, x0 = [0.5, 1, 0.1], 
                  bounds = [(0, 1), (0, None), (0,1)], method='Nelder-Mead')
         print(res.success)
 
         self.alpha, self.beta, self.gamma = res.x 
         return self.alpha, self.beta, self.gamma
     
-    def predict(self):
+    def predict_RL(self):
          # 1 for accurate prediction, 0 for not
         rl_choices = [[] for k in range(len(self.p_levels))]
         agent = RL.FeatureRLDecay(self.alpha, self.beta, self.gamma)
 
         for p in range(len(self.p_levels)):
-            for trial in range(len(self.test_envs[0])):
+            for trial in range(len(self.test_envs[p])):
                 agent.reset_v()
 
                 env = self.test_envs[p][trial]
@@ -125,7 +137,8 @@ class Subject():
 
                 for k in range(len(rd)):
                     agent.set_action(env[k, :4])
-                    a_k_idx = agent.select_stim()
+                    a_k_idx, p_a = agent.select_stim()
+                    print(p_a)
                     real_ak_idx = self._argchoice(agent.actions, env[k, -1])[0][0]
 
                     if a_k_idx == real_ak_idx:
@@ -134,12 +147,58 @@ class Subject():
                         rl_choices[p].append(0)
                     agent.update_v(real_ak_idx, rd[k])
         return rl_choices
-
-
-
-
     
-you = Subject("bj", np.array([0.6, 0.8, 1.]))
-you.train()
+    def predict_SA(self):
+        sa_choices = [[] for k in range(len(self.p_levels))]
+        stimuli = np.zeros(64, dtype=tuple)
 
-print(you.predict())
+        for col in range(4):
+            for shape in range(4):
+                for pat in range(4):
+                    stimuli[int(16*col + 4*shape + pat)] = (col, shape, pat)
+
+        for p in range(len(self.p_levels)):
+            for trial in range(len(self.test_envs[p])):
+                sa_dict = {stimuli[i] : 0 for i in range(64)}
+
+                env = self.test_envs[p][trial]
+                rd = self.test_rd[p][trial]
+
+                for t in range(len(rd)):
+                    # extract associ of options
+                    vals = np.array([sa_dict[tuple(env[t, 0])], sa_dict[tuple(env[t, 1])], 
+                                         sa_dict[tuple(env[t, 2])], sa_dict[tuple(env[t, 3])]])
+                    if np.sum(vals) == 0:
+                        p_a = np.ones(4)*0.25
+                    else:
+                        p_a = vals / np.sum(vals)
+                    a_k_idx = np.random.choice(list(range(4)), p=p_a)
+                    real_ak_idx = self._argchoice(env[t, :4], env[t, -1])[0][0]
+
+                    if a_k_idx == real_ak_idx:
+                        sa_choices[p].append(1)
+                    else:
+                        sa_choices[p].append(0)
+
+                    if rd[t] == 1:
+                        sa_dict[tuple(env[t, real_ak_idx])] += 50
+
+        return sa_choices
+
+# you = Subject("bj", np.array([0.6, 0.8, 1.]))
+# you.train()
+# print(you.alpha)
+# print(you.beta)
+# print(you.gamma)
+
+# acc = you.predict_RL()
+# print(sum(acc[0]) / len(acc[0]))
+# print(sum(acc[1]) / len(acc[1]))
+# print(sum(acc[2]) / len(acc[2]))
+
+# sacc = you.predict_SA()
+# print(sum(sacc[0]) / len(sacc[0]))
+# print(sum(sacc[1]) / len(sacc[1]))
+# print(sum(sacc[2]) / len(sacc[2]))
+
+
