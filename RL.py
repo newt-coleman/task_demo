@@ -44,7 +44,7 @@ class FeatureRLDecay():
         p_a = self.boltz_prob()
 
         a_k_idx = np.random.choice(list(range(4)), p=p_a)
-        return a_k_idx, p_a
+        return a_k_idx
 
     def update_v(self, a_k_idx, r):
         a_k = self.actions[a_k_idx] # FIX THIS SHAPE ISSUE BW TRAIN AND PREDICT

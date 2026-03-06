@@ -137,8 +137,7 @@ class Subject():
 
                 for k in range(len(rd)):
                     agent.set_action(env[k, :4])
-                    a_k_idx, p_a = agent.select_stim()
-                    print(p_a)
+                    a_k_idx = agent.select_stim()
                     real_ak_idx = self._argchoice(agent.actions, env[k, -1])[0][0]
 
                     if a_k_idx == real_ak_idx:
