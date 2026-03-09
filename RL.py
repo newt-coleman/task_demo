@@ -19,12 +19,8 @@ class FeatureRLDecay():
 
     def boltz_prob(self):
         """generates the boltzman probability for each action option"""
-        p_all = 0
-        for j in range(len(self.actions)):
-            p_all += np.exp(self.beta*self.q[j])
-        p_a = np.empty(4)
-        for j in range(len(self.actions)):
-            p_a[j] = np.exp(self.beta*self.q[j]) / p_all
+        temperature = max(self.beta, 0.01) 
+        p_a = np.exp(temperature*self.q) / np.sum(np.exp(temperature*self.q))
         return p_a 
     
     def set_q(self):
@@ -48,12 +44,15 @@ class FeatureRLDecay():
 
     def update_v(self, a_k_idx, r):
         a_k = self.actions[a_k_idx] # FIX THIS SHAPE ISSUE BW TRAIN AND PREDICT
-        if a_k.shape == (1,1):
+        if a_k.shape == (1,1):      # this is the fix??
             a_k = a_k[0][0]
         self.set_q()
+
         for z in self.v_feature.keys():
-            if np.all(z==a_k[0]) or np.all(z==a_k[1]) or np.all(z==a_k[2]):
-                # print("qi=" + str(self.q[a_k_idx]))
-                self.v_feature[z] += self.alpha*((50*r)-self.q[a_k_idx])
+            has_feature = (z[0] == 0 and z[1] == a_k[0]) or (z[0] == 1 and z[1] == a_k[1]) or (z[0] == 2 and z[1] == a_k[2])
+            if has_feature and r==1:
+                self.v_feature[z] += self.alpha*((r)-self.q[a_k_idx])
             else:
-                self.v_feature[z] *= self.gamma
+                # print(self.v_feature[z])
+                self.v_feature[z] *= (1-self.gamma)
+                # print(self.v_feature[z])

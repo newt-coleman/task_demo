@@ -20,7 +20,7 @@ class Subject():
         for file_name in os.listdir(self.data_path):
             dat = np.load(self.data_path + "\\" + file_name, allow_pickle=True)
             p = float(file_name.split("_")[1])
-            idx = np.argwhere(self.p_levels==p)[0][0]
+            idx = np.argwhere(self.p_levels==p)[0]
 
             if 'choicedata' in file_name:
                 envs[idx].append(dat)
@@ -29,26 +29,26 @@ class Subject():
 
         
         # split data into train and test sets
-        test_args = np.random.choice(list(range(0, len(rd[0]))), 
-                                     size = int(0.3*len(rd[0])), replace =False)
-        for i in range(len(rd[0])):
-            if i in test_args:
-                for j in range(len(self.p_levels)):
-                    self.test_envs[j].append(envs[j][i])
-                    self.test_rd[j].append(rd[j][i])
-            else:
-                for j in range(len(self.p_levels)):
-                    self.train_envs[j].append(envs[j][i])
-                    self.train_rd[j].append(rd[j][i])
-        print(len(self.train_envs[0]))
+        # test_args = np.random.choice(list(range(0, len(rd[0]))), 
+        #                              size = int(0.3*len(rd[0])), replace =False)
+        # for i in range(len(rd[0])):
+        #     if i in test_args:
+        #         for j in range(len(self.p_levels)):
+        #             self.test_envs[j].append(envs[j][i])
+        #             self.test_rd[j].append(rd[j][i])
+        #     else:
+        #         for j in range(len(self.p_levels)):
+        #             self.train_envs[j].append(envs[j][i])
+        #             self.train_rd[j].append(rd[j][i])
+        # print(len(self.train_envs[0]))
 
         ## all train all test
-        # for i in range(len(rd[0])):
-        #     for j in range(len(self.p_levels)):
-        #         self.test_envs[j].append(envs[j][i])
-        #         self.test_rd[j].append(rd[j][i])
-        # self.train_envs = self.test_envs
-        # self.train_rd = self.test_rd
+        for i in range(len(rd[0])):
+            for j in range(len(self.p_levels)):
+                self.test_envs[j].append(envs[j][i])
+                self.test_rd[j].append(rd[j][i])
+        self.train_envs = self.test_envs
+        self.train_rd = self.test_rd
  
         # print(len(self.train_envs[0]))
 
@@ -116,7 +116,7 @@ class Subject():
             return -1 * self.LL(env, reward_data, alpha, beta, gamma)
         
         print("Start!")
-        res = minimize(loss, x0 = [0.5, 1, 0.1], 
+        res = minimize(loss, x0 = [0.8, 15, 1], 
                  bounds = [(0, 1), (0, None), (0,1)], method='Nelder-Mead')
         print(res.success)
 

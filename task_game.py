@@ -35,8 +35,8 @@ class TaskTrial:
         choice_d = {"opt_0" : [], "opt_1" : [], "opt_2" : [], "opt_3" : [], "choice" : []}
         self.choice_data=pd.DataFrame(data=choice_d)
 
-        self.score = 0    # 
-        self.last_correct = 0 # number of previous correct answers
+        self.score = 0    
+        self.last_correct = 0 
         self.feature = (np.random.randint(0,3), np.random.randint(0,4)) # 0 is type, 1 is which one
         print(self.feature)
 
@@ -96,17 +96,17 @@ class TaskTrial:
                 self.score_label['text'] = "SCORE: " + str(self.score)
             else:
                  self.rewards.append(0)
-        # else:  # only false negatives
-        #     self.rewards.append(0)
-        #     self.last_correct = 0
-        else:  ## false positive
-            if np.random.random(1)[0] >= self.p_index:
-                self.rewards.append(1)
-                self.score += 50
-                self.score_label['text'] = "SCORE: " + str(self.score)
-            else:
-                self.rewards.append(0)
+        else:  # only false negatives
+            self.rewards.append(0)
             self.last_correct = 0
+        # else:  ## false positive
+        #     if np.random.random(1)[0] >= self.p_index:
+        #         self.rewards.append(1)
+        #         self.score += 50
+        #         self.score_label['text'] = "SCORE: " + str(self.score)
+        #     else:
+        #         self.rewards.append(0)
+        #     self.last_correct = 0
             
 
         self.choice_data.loc[len(self.choice_data)] = [stimuli_options[:, 0], 
@@ -209,7 +209,7 @@ def run_trials(ntrials, p_levels, userid = 'test'):
    
     root.mainloop()
 
-run_trials(N_TRIALS, P_LEVELS, "")
+run_trials(N_TRIALS, P_LEVELS, "ak")
 
 
 
