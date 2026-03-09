@@ -20,7 +20,7 @@ class Subject():
         for file_name in os.listdir(self.data_path):
             dat = np.load(self.data_path + "\\" + file_name, allow_pickle=True)
             p = float(file_name.split("_")[1])
-            idx = np.argwhere(self.p_levels==p)[0]
+            idx = np.argwhere(self.p_levels==p)[0][0]
 
             if 'choicedata' in file_name:
                 envs[idx].append(dat)
